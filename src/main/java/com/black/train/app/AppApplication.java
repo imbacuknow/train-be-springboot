@@ -1,4 +1,4 @@
-package com.black.train.App;
+package com.black.train.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

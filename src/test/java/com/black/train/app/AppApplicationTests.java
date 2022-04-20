@@ -1,4 +1,4 @@
-package com.black.train.App;
+package com.black.train.app;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
