@@ -15,9 +15,14 @@ import java.util.List;
 @RequestMapping("/personal")
 public class PersonalController {
 
-    @Autowired
     private PersonalService personalService;
 
+    @Autowired
+    public PersonalController(PersonalService personalService) {
+        this.personalService = personalService;
+    }
+
+    // ---------------- GetMapping ----------------
     @GetMapping("/getAllPersonal")
     public ResponseEntity<List<Personal>> getAllPersonal(){
         return ResponseEntity.ok(personalService.retrieveAllPersonal());
@@ -28,18 +33,33 @@ public class PersonalController {
         return ResponseEntity.ok(personalService.retrievePersonalById(id));
     }
 
+    @GetMapping("/getPersonalAgeUnder50")
+    public ResponseEntity<List<Personal>> getPersonalAgeUnder50(){
+        return ResponseEntity.ok(personalService.retrievePersonalAgeUnder50());
+    }
+
+    // ---------------- PostMapping ----------------
     @PostMapping("/createPersonal")
     public ResponseEntity<HttpStatus> createPersonal(@RequestBody CreatePersonalRequest createPersonalRequest){
         personalService.createPersonal(createPersonalRequest);
         return ResponseEntity.created(null).build();
     }
 
+    @PostMapping("/createMultiPersonal")
+    public ResponseEntity<HttpStatus> createMultiPersonal(@RequestBody List<CreatePersonalRequest> createPersonalRequests){
+        personalService.createMultiplePersonal(createPersonalRequests);
+        return ResponseEntity.created(null).build();
+    }
+
+
+    // ---------------- PutMapping ----------------
     @PutMapping("/updatePersonal")
     public ResponseEntity<HttpStatus> updatePersonal(@RequestBody CreatePersonalRequest createPersonalRequest){
         personalService.updatePersonal(createPersonalRequest);
         return ResponseEntity.accepted().build();
     }
 
+    // ---------------- DeleteMapping ----------------
     @DeleteMapping("/deletePersonal")
     public ResponseEntity<HttpStatus> deletePersonal(@RequestParam("id") Long id){
         personalService.deletePersonal(id);
