@@ -3,7 +3,7 @@ package com.black.train.app.model;
 import lombok.Data;
 
 @Data
-public class CreatePersonalRequest {
+public class CreatePersonRequest {
     private Long id;
     private String name;
     private double height;
