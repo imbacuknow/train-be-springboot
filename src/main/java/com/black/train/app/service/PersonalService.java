@@ -7,6 +7,9 @@ import com.black.train.app.repository.PersonalRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -57,6 +60,7 @@ public class PersonalService {
         return personalRepository.findAll();
     }
 
+    @Cacheable(value = "personal", key = "#id", unless = "#result == null")
     public Personal retrievePersonalById(Long id) {
         log.info("Retrieving personal with id: {}", id);
         return personalRepository.findById(id).orElse(null);
@@ -72,6 +76,7 @@ public class PersonalService {
     }
 
     // ---------------- update ----------------
+    @CachePut(value = "personal", key = "#personalRequest.id")
     public Personal updatePersonal(CreatePersonalRequest personalRequest) {
         log.info("Updating personal with id: {}", personalRequest);
         Personal personal = personalRepository.findById(personalRequest.getId()).orElseThrow(() -> new DataNotFoundException("Personal not found"));
@@ -83,9 +88,16 @@ public class PersonalService {
     }
 
     // ---------------- delete ----------------
+    @CacheEvict(value = "personal", key = "#id")
     public void deletePersonal(Long id) {
         log.info("Deleting personal with id: {}", id);
         Personal personal = personalRepository.findById(id).orElseThrow(() -> new DataNotFoundException("Personal not found"));
         personalRepository.deleteById(id);
+    }
+
+    @CacheEvict(value = "personal", allEntries = true)
+    public void deleteAllPersonal() {
+        log.info("Deleting all personal");
+        personalRepository.deleteAll();
     }
 }
