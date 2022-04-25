@@ -65,4 +65,10 @@ public class PersonalController {
         personalService.deletePersonal(id);
         return ResponseEntity.accepted().build();
     }
+
+    @DeleteMapping("/deleteAllPersonal")
+    public ResponseEntity<HttpStatus> deletePersonalAll(@RequestParam("id") Long id){
+        personalService.deleteAllPersonal();
+        return ResponseEntity.accepted().build();
+    }
 }

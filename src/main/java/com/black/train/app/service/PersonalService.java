@@ -29,6 +29,7 @@ public class PersonalService {
     }
 
     // ---------------- create ----------------
+    @CacheEvict(value = {"personals", "personalsAgeUnder50"}, allEntries = true)
     public Personal createPersonal(CreatePersonalRequest personalRequest) {
         log.info("Creating personal: {}", personalRequest);
         Personal personal = Personal.builder()
@@ -39,6 +40,7 @@ public class PersonalService {
                 .build();
         return personalRepository.save(personal);
     }
+    @CacheEvict(value = {"personals", "personalsAgeUnder50"}, allEntries = true)
     public List<Personal> createMultiplePersonal(List<CreatePersonalRequest> personalRequest) {
         log.info("Creating multiple personal: {}", personalRequest);
         List<Personal> personals = new ArrayList<>();
@@ -55,6 +57,7 @@ public class PersonalService {
     }
 
     // ---------------- read ----------------
+    @Cacheable("personals")
     public List<Personal> retrieveAllPersonal() {
         log.info("Retrieving all personal");
         return personalRepository.findAll();
@@ -66,6 +69,7 @@ public class PersonalService {
         return personalRepository.findById(id).orElse(null);
     }
 
+    @Cacheable("personalsAgeUnder50")
     public List<Personal> retrievePersonalAgeUnder50() {
         log.info("Retrieving personal age under 50");
         List<Personal> personalAgeUnder50 = personalRepository.findAll()
@@ -77,6 +81,7 @@ public class PersonalService {
 
     // ---------------- update ----------------
     @CachePut(value = "personal", key = "#personalRequest.id")
+    @CacheEvict(value = {"personals", "personalsAgeUnder50"}, allEntries = true)
     public Personal updatePersonal(CreatePersonalRequest personalRequest) {
         log.info("Updating personal with id: {}", personalRequest);
         Personal personal = personalRepository.findById(personalRequest.getId()).orElseThrow(() -> new DataNotFoundException("Personal not found"));
@@ -88,14 +93,14 @@ public class PersonalService {
     }
 
     // ---------------- delete ----------------
-    @CacheEvict(value = "personal", key = "#id")
+    @CacheEvict(value = {"personals", "personalsAgeUnder50"}, key = "#id")
     public void deletePersonal(Long id) {
         log.info("Deleting personal with id: {}", id);
         Personal personal = personalRepository.findById(id).orElseThrow(() -> new DataNotFoundException("Personal not found"));
         personalRepository.deleteById(id);
     }
 
-    @CacheEvict(value = "personal", allEntries = true)
+    @CacheEvict(value = {"personals", "personalsAgeUnder50"}, allEntries = true)
     public void deleteAllPersonal() {
         log.info("Deleting all personal");
         personalRepository.deleteAll();
