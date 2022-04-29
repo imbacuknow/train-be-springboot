@@ -32,4 +32,7 @@ public class Person implements Serializable {
 
     @Column(name = "AGE")
     private int age;
+
+     @Column(name = "EMAIL")
+    private String email;
 }

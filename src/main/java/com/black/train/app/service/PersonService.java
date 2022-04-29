@@ -6,9 +6,14 @@ import com.black.train.app.model.CreatePersonRequest;
 import com.black.train.app.repository.PersonRepository;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,19 +21,22 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PersonService {
 
     private PersonRepository personRepository;
     private Gson gson;
     private RedisTemplate redisTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
 
     @Autowired
-    public PersonService(PersonRepository personRepository, Gson gson, RedisTemplate redisTemplate) {
+    public PersonService(PersonRepository personRepository, Gson gson, RedisTemplate redisTemplate, KafkaTemplate<String, String> kafkaTemplate) {
         this.personRepository = personRepository;
         this.gson = gson;
         this.redisTemplate = redisTemplate;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     // ---------------- create ----------------
@@ -38,8 +46,23 @@ public class PersonService {
                 .height(personalRequest.getHeight())
                 .weight(personalRequest.getWeight())
                 .age(personalRequest.getAge())
+                .email(personalRequest.getEmail())
                 .build();
         redisTemplate.keys("personal*").forEach(key -> redisTemplate.delete(key));
+        // send to kafka
+        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send("activation-email", personalRequest.getEmail());
+        future.addCallback(new ListenableFutureCallback<>() {
+            @Override
+            public void onFailure(Throwable ex) {
+                log.error("Kafka send failed: {}", ex.getMessage());
+            }
+
+            @Override
+            public void onSuccess(SendResult<String, String> result) {
+                log.info("Kafka send success: {}", result.toString());
+            }
+        });
+
         return personRepository.save(person);
     }
     public List<Person> createMultiplePersonal(List<CreatePersonRequest> personalRequest) {
@@ -50,6 +73,7 @@ public class PersonService {
                     .height(personal.getHeight())
                     .weight(personal.getWeight())
                     .age(personal.getAge())
+                    .email(personal.getEmail())
                     .build();
             people.add(_person);
         });

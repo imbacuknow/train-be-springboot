@@ -9,4 +9,5 @@ public class CreatePersonRequest {
     private double height;
     private double weight;
     private int age;
+    private String email;
 }

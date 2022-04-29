@@ -1,4 +1,9 @@
+# producer
 spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: "my-consumer-group"
   datasource:
     url: jdbc:h2:mem:testdb
     username: admin
@@ -8,6 +13,7 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
   h2:
     console:
+      path: /h2-console
       enabled: true
   redis:
     host: localhost
